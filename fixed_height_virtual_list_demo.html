@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fixed Height Virtual List Demo</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      .list-container {
+        margin: 0 auto;
+        height: 100vh;
+        overflow: auto;
+        max-width: 512px;
+        width: 100%;
+        border: solid 2px black;
+      }
+
+      .ghost-container {
+        width: 100%;
+      }
+
+      .visible-list > .visible-list-item {
+        list-style: none;
+        height: 50px;
+        width: 100%;
+        padding-left: 20px;
+        background-color: #eee;
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="list-container">
+      <div class="ghost-container">
+        <ul class="visible-list"></ul>
+      </div>
+    </div>
+
+    <script>
+      function createData(amount) {
+        return Array.from({ length: amount }, (_, index) => {
+          return `Item ${index}: ${Math.random()}`;
+        });
+      }
+
+      let list_container = document.getElementsByClassName("list-container")[0];
+      let ghost_container =
+        document.getElementsByClassName("ghost-container")[0];
+      let visible_list = document.getElementsByClassName("visible-list")[0];
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const amountParam = urlParams.get("amount");
+
+      const amount = amountParam ? Math.max(parseInt(amountParam, 10), 500000) : 100000;
+      const item_height = 50;
+      const total_height = amount * item_height;
+      const data = createData(amount);
+
+      ghost_container.style.height = `${total_height}px`;
+
+      function renderVisibleItems() {
+        const viewport_height = list_container.clientHeight;
+        const scroll_top = list_container.scrollTop;
+
+        const start_index = Math.floor(scroll_top / item_height);
+        const end_index = Math.min(
+          data.length - 1,
+          start_index + Math.ceil(viewport_height / item_height)
+        );
+
+        const visible_data = data.slice(start_index, end_index + 1);
+
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < visible_data.length; i++) {
+          const item = document.createElement("li");
+          item.className = `visible-list-item`;
+          item.innerText = visible_data[i];
+          fragment.appendChild(item);
+        }
+
+        visible_list.innerHTML = "";
+        visible_list.appendChild(fragment);
+
+        const offset = start_index * item_height;
+
+        visible_list.style.transform = `translateY(${offset}px)`;
+      }
+
+      let is_scrolling = null;
+      list_container.addEventListener("scroll", () => {
+        if (is_scrolling) {
+          window.cancelAnimationFrame(is_scrolling);
+        }
+        is_scrolling = window.requestAnimationFrame(() => {
+          renderVisibleItems();
+        });
+      });
+
+      renderVisibleItems();
+    </script>
+  </body>
+</html>
