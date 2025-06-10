@@ -57,7 +57,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const amountParam = urlParams.get("amount");
 
-      const amount = amountParam ? Math.max(parseInt(amountParam, 10), 500000) : 100000;
+      const amount = amountParam ? Math.min(parseInt(amountParam, 10), 500000) : 100000;
       const item_height = 50;
       const total_height = amount * item_height;
       const data = createData(amount);
