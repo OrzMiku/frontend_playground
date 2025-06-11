@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LazyLoad Demo</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+
+      #image-list {
+        width: fit-content;
+        margin: 0 auto;
+        list-style: none;
+      }
+
+      #image-list img {
+        width: 100%;
+        max-width: 512px;
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="image-list"></ul>
+    <script>
+      const image_list_ul = document.getElementById("image-list");
+      const placeholder = "/assets/images/icon.png";
+      const imagesUrls = [
+        "/assets/images/01.png",
+        "/assets/images/02.png",
+        "/assets/images/03.png",
+        "/assets/images/04.png",
+        "/assets/images/05.png",
+        "/assets/images/06.png",
+        "/assets/images/07.png",
+        "/assets/images/08.png",
+        "/assets/images/09.png",
+        "/assets/images/10.png",
+        "/assets/images/11.png",
+      ];
+      function createImageList() {
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < imagesUrls.length; i++) {
+          const li = document.createElement("li");
+          const img = document.createElement("img");
+          img.src = placeholder;
+          img.dataset.src = imagesUrls[i];
+          li.appendChild(img);
+          frag.appendChild(li);
+        }
+        image_list_ul.appendChild(frag);
+      }
+      createImageList();
+      const images = Array.from(document.getElementsByTagName("img"));
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src;
+            delete img.dataset.src;
+            observer.unobserve(img);
+          }
+        });
+      });
+
+      images.forEach((image) => {
+        observer.observe(image);
+      });
+    </script>
+  </body>
+</html>
