@@ -15,11 +15,15 @@
         margin: 0 auto;
         list-style: none;
       }
-
+      
       #image-list img {
         width: 100%;
         min-height: 64px;
         max-width: 512px;
+        transition: opacity 0.3s ease;
+        background-color: #f0f0f0;
+        display: block;
+        margin-bottom: 10px;
       }
     </style>
   </head>
@@ -55,19 +59,40 @@
       }
       createImageList();
       const images = Array.from(document.getElementsByTagName("img"));
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const img = entry.target;
-            img.src = img.dataset.src;
-            observer.unobserve(img);
-          }
-        });
-      });
+              img.style.opacity = "0.5";
+
+              const newImg = new Image();
+
+              newImg.onload = () => {
+                img.src = img.dataset.src;
+                img.style.opacity = "1";
+                observer.unobserve(img);
+              };
+
+              newImg.onerror = () => {
+                img.src = img.dataset.placeholder;
+                img.style.opacity = "1";
+                img.alt = "图片加载失败";
+                observer.unobserve(img);
+              };
+
+              newImg.src = img.dataset.src;
+            }
+          });
+        },
+        {
+          rootMargin: "50px",
+        }
+      );
 
       images.forEach((image) => {
-        if(!image.src) image.src = image.dataset.placeholder;
+        if (!image.src) image.src = image.dataset.placeholder;
         observer.observe(image);
       });
     </script>
